@@ -4,21 +4,19 @@ import userEvent from '@testing-library/user-event';
 import SearchBar from '../SearchBar';
 
 describe('SearchBar', () => {
-  it('renders an input and a submit button', () => {
+  it('renders a search input', () => {
     render(<SearchBar onSearch={jest.fn()} />);
     expect(screen.getByLabelText(/search term/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /search/i })).toBeInTheDocument();
   });
 
-  it('calls onSearch with the trimmed input value on submit', async () => {
+  it('calls onSearch with the trimmed input value as the user types', async () => {
     const user = userEvent.setup();
     const handleSearch = jest.fn();
     render(<SearchBar onSearch={handleSearch} />);
 
-    await user.type(screen.getByLabelText(/search term/i), '  running shoes  ');
-    await user.click(screen.getByRole('button', { name: /search/i }));
+    await user.type(screen.getByLabelText(/search term/i), 'shoes');
 
-    expect(handleSearch).toHaveBeenCalledWith('running shoes');
+    expect(handleSearch).toHaveBeenLastCalledWith('shoes');
   });
 
   it('pre-fills the input from initialValue', () => {

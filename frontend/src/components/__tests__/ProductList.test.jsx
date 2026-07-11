@@ -26,8 +26,6 @@ describe('ProductList', () => {
     await screen.findByText('Running Shoes');
 
     await user.type(screen.getByLabelText(/search term/i), 'Hiking');
-    await user.click(screen.getByRole('button', { name: /search/i }));
-
     await waitFor(() => {
       expect(screen.queryByText('Running Shoes')).not.toBeInTheDocument();
     });
