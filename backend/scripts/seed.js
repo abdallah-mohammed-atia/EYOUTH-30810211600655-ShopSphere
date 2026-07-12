@@ -11,12 +11,17 @@ const ADMIN = { name: 'Admin User', email: 'admin@example.com', password: 'Admin
 const CUSTOMER = { name: 'Test Customer', email: 'customer@example.com', password: 'Customer123!', role: 'customer' };
 
 const SAMPLE_PRODUCTS = [
-  { name: 'Running Shoes', description: 'Lightweight everyday trainers.', price: 59.99, category: 'shoes', stock: 25, imageUrl: '/uploads/running-shoes.svg' },
-  { name: 'Hiking Boots', description: 'Waterproof boots for rough terrain.', price: 129.99, category: 'shoes', stock: 15, imageUrl: '/uploads/hiking-boots.svg' },
-  { name: 'Cotton T-Shirt', description: 'Soft, breathable everyday tee.', price: 19.99, category: 'apparel', stock: 100, imageUrl: '/uploads/cotton-tshirt.svg' },
-  { name: 'Denim Jacket', description: 'Classic fit denim jacket.', price: 79.99, category: 'apparel', stock: 30, imageUrl: '/uploads/denim-jacket.svg' },
-  { name: 'Wireless Headphones', description: 'Over-ear headphones with noise cancellation.', price: 149.99, category: 'electronics', stock: 20, imageUrl: '/uploads/wireless-headphones.svg' },
-  { name: 'Ceramic Mug', description: '350ml ceramic coffee mug.', price: 12.5, category: 'home', stock: 60, imageUrl: '/uploads/ceramic-mug.svg' },
+  { name: 'running shoes', description: 'Lightweight everyday trainers', price: 39.99, category: 'feetwear', stock: 35, imageUrl: '/seed-images/running-shoes.png' },
+  { name: 'boots', description: 'strong boots for hiking and heavy rain', price: 29.99, category: 'feetwear', stock: 30, imageUrl: '/seed-images/boots.png' },
+  { name: 'smart watch', description: 'xioami black smart watch', price: 49.99, category: 'electronics', stock: 50, imageUrl: '/seed-images/smart-watch.png' },
+  { name: 'Smart TV', description: 'LG smart tv high quality', price: 149.99, category: 'electronics', stock: 20, imageUrl: '/seed-images/smart-tv.png' },
+  { name: 'ps5 controller', description: 'playstation 5 white controller', price: 79.99, category: 'gaming', stock: 50, imageUrl: '/seed-images/ps5-controller.png' },
+  { name: 'headset', description: 'black gaming headset', price: 24.99, category: 'gaming', stock: 28, imageUrl: '/seed-images/headset.png' },
+  { name: 'blue hoodie', description: 'blue winter hoodie', price: 14.99, category: 'clothes', stock: 90, imageUrl: '/seed-images/blue-hoodie.png' },
+  { name: 'microwave', description: 'Toshiba microwave', price: 89.99, category: 'electronics', stock: 15, imageUrl: '/seed-images/microwave.png' },
+  { name: 'KETTLE', description: 'Electric modern kettle', price: 64.99, category: 'electronics', stock: 34, imageUrl: '/seed-images/kettle.png' },
+  { name: 'hat', description: 'blue stylish hat', price: 7.99, category: 'clothes', stock: 150, imageUrl: '/seed-images/hat.png' },
+  { name: 'football', description: 'official 25/26 laliga ball', price: 44.99, category: 'sports', stock: 5, imageUrl: '/seed-images/football.png' },
 ];
 
 async function seed() {
