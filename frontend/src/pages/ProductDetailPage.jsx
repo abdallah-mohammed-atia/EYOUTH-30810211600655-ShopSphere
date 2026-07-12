@@ -1,4 +1,4 @@
-﻿import "./ProductDetailPage.css";
+import "./ProductDetailPage.css";
 import React, { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';

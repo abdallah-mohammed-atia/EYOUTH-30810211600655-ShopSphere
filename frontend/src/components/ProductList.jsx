@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import * as productApi from '../api/productApi';
+import * as categoryApi from '../api/categoryApi';
 import ProductCard from './ProductCard';
 import SearchBar from './SearchBar';
 
 export default function ProductList() {
   const [filters, setFilters] = useState({ search: '', category: '', sortBy: 'createdAt', order: 'ASC', page: 1 });
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['products', filters],
     queryFn: () => productApi.getProducts(filters),
     keepPreviousData: true,
@@ -17,6 +18,14 @@ export default function ProductList() {
   const products = data?.items ?? [];
   const pagination = data?.pagination ?? { page: 1, totalPages: 1 };
   const errorMessage = 'Unable to load products. Please try again later.';
+
+  const categoriesQuery = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => categoryApi.getCategories(),
+    retry: false,
+  });
+
+  const categories = categoriesQuery.data?.items ?? [];
 
   const handleSearch = (term) => {
     setFilters((prev) => ({ ...prev, search: term, page: 1 }));
@@ -39,6 +48,22 @@ export default function ProductList() {
       <SearchBar onSearch={handleSearch} initialValue={filters.search} />
 
       <div className="product-controls">
+        <label htmlFor="category-select">
+          Category:
+          <select
+            id="category-select"
+            value={filters.category}
+            onChange={(e) => setFilters((prev) => ({ ...prev, category: e.target.value, page: 1 }))}
+          >
+            <option value="">All</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.name}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </label>
+
         <label htmlFor="sort-select">
           Sort by:
           <select id="sort-select" value={filters.sortBy} onChange={handleSortChange}>
@@ -84,6 +109,10 @@ export default function ProductList() {
             </button>
           </div>
         </>
+      )}
+
+      {categoriesQuery.isError && (
+        <p role="alert">Unable to load categories. Category filter is disabled.</p>
       )}
     </div>
   );

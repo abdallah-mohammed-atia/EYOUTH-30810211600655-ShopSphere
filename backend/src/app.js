@@ -19,12 +19,6 @@ app.use(express.urlencoded({ extended: true }));
 const uploadsPath = path.join(__dirname, 'uploads');
 const seedImagesPath = path.join(__dirname, 'seed-images');
 
-console.log('Uploads path:', uploadsPath);
-
-
-console.log('Uploads path:', uploadsPath);
-console.log('Uploads exists:', require('fs').existsSync(uploadsPath));
-
 app.use('/uploads', express.static(uploadsPath));
 app.use('/seed-images', express.static(seedImagesPath));
 
