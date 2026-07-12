@@ -39,8 +39,15 @@ function uploadImageExists(imageUrl) {
     return false;
   }
 
-  const fileName = path.basename(imageUrl);
-  const filePath = path.join(__dirname, '..', 'uploads', fileName);
+  const relativePath = imageUrl.replace('/uploads/', '');
+
+  const filePath = path.join(
+    __dirname,
+    '..',
+    'uploads',
+    relativePath
+  );
+
   return fs.existsSync(filePath);
 }
 
