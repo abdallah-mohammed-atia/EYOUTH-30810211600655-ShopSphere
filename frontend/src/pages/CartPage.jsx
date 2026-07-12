@@ -1,10 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 export default function CartPage() {
   const { items, total, loading, error, refreshCart, updateItem, removeItem } = useCart();
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+const navigate = useNavigate();
+const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+const [isOrderPlaced, setIsOrderPlaced] = useState(false);
+
   const [discountCode, setDiscountCode] = useState('');
 
   const discountedTotal = useMemo(() => {
@@ -80,16 +83,46 @@ export default function CartPage() {
             <p className="cart-total">Subtotal: ${Number(total).toFixed(2)}</p>
             <p className="cart-total">Discounted total: ${discountedTotal}</p>
             <div className="checkout-actions">
-              <button type="button" className="button button-secondary" onClick={() => setIsCheckoutOpen(false)}>
-                Close
-              </button>
-              <button type="button" className="button">
-                Place Order
-              </button>
-            </div>
+  <button type="button" className="button button-secondary" onClick={() => setIsCheckoutOpen(false)}>
+    Close
+  </button>
+  <button
+    type="button"
+    className="button"
+    onClick={() => {
+      setIsCheckoutOpen(false);
+      setIsOrderPlaced(true);
+    }}
+  >
+    Place Order
+  </button>
+</div>
           </div>
         </div>
       )}
+      {isOrderPlaced && (
+  <div className="checkout-modal" role="dialog" aria-modal="true">
+    <div className="checkout-modal-card order-success-card">
+      <h2 className="order-success-title">Thanks for Shopping!</h2>
+      <p className="order-success-message">
+        Your order has been placed successfully. We hope you enjoy your new items!
+      </p>
+      <button
+  type="button"
+  className="button order-success-button"
+  onClick={() => {
+    setIsOrderPlaced(false);
+    navigate('/');
+  }}
+>
+  Continue Shopping
+</button>
+      
+    </div>
+  </div>
+)}
+      
     </div>
   );
 }
+
