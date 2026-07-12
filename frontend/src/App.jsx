@@ -7,6 +7,7 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ProductListingPage from './pages/ProductListingPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import CartPage from './pages/CartPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
@@ -72,6 +73,7 @@ function AppRoutes() {
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/products" element={<ProductListingPage />} />
       <Route path="/products/:id" element={<ProductDetailPage />} />
       <Route
         path="/cart"
