@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 export default function CartPage() {
-  const { items, total, loading, error, refreshCart, updateItem, removeItem } = useCart();
+  const { items, total, loading, error, refreshCart, updateItem, removeItem, clearCart } = useCart();
 const navigate = useNavigate();
 const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 const [isOrderPlaced, setIsOrderPlaced] = useState(false);
@@ -110,8 +110,9 @@ const [isOrderPlaced, setIsOrderPlaced] = useState(false);
       <button
   type="button"
   className="button order-success-button"
-  onClick={() => {
+  onClick={async () => {
     setIsOrderPlaced(false);
+    await clearCart();
     navigate('/');
   }}
 >

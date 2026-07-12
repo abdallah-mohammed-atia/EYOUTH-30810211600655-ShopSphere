@@ -58,18 +58,28 @@ export function CartProvider({ children }) {
       setError('Could not remove item from cart.');
     }
   };
+  const clearCart = async () => {
+  setError(null);
+  try {
+    await Promise.all(items.map((item) => cartApi.removeCartItem(item.id)));
+    await refreshCart();
+  } catch (err) {
+    setError('Could not clear the cart.');
+  }
+};
+const value = {
+  items,
+  total,
+  loading,
+  error,
+  itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
+  refreshCart,
+  addItem,
+  updateItem,
+  removeItem,
+  clearCart,
+};
 
-  const value = {
-    items,
-    total,
-    loading,
-    error,
-    itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
-    refreshCart,
-    addItem,
-    updateItem,
-    removeItem,
-  };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
