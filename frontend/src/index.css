@@ -453,6 +453,27 @@ body[data-theme='dark'] .product-detail input[type='number'] {
   gap: 0.75rem;
   margin-top: 1rem;
 }
+.order-success-card {
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+
+.order-success-title {
+  color: #16a34a;
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin: 0 0 1rem;
+}
+
+.order-success-message {
+  color: var(--muted);
+  margin: 0 0 1.5rem;
+  line-height: 1.6;
+}
+
+.order-success-button {
+  min-width: 200px;
+}
 
 .product-list label {
   display: flex;
