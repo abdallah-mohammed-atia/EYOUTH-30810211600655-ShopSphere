@@ -9,6 +9,7 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const healthRoutes = require('./routes/healthRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -25,7 +26,7 @@ app.use('/seed-images', express.static(seedImagesPath));
 app.get('/', (req, res) => {
   res.status(200).json({
     message: 'E-Commerce API',
-    endpoints: ['/api', '/api/health', '/api/auth', '/api/products', '/api/cart'],
+    endpoints: ['/api', '/api/health', '/api/auth', '/api/products', '/api/cart', '/api/orders'],
   });
 });
 
@@ -38,7 +39,7 @@ app.use('/health', healthRoutes);
 app.get('/api', (req, res) => {
   res.status(200).json({
     message: 'E-Commerce API',
-    endpoints: ['/api/health', '/api/auth', '/api/products', '/api/cart'],
+    endpoints: ['/api/health', '/api/auth', '/api/products', '/api/cart', '/api/orders', '/api/categories', '/api/reviews', '/api/admin'],
   });
 });
 app.use('/api/auth', authRoutes);
@@ -46,6 +47,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.use(notFoundHandler);

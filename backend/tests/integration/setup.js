@@ -1,4 +1,6 @@
 const { sequelize } = require('../../src/models');
+const { closeMongo } = require('../../src/lib/mongo');
+const prisma = require('../../src/lib/prisma');
 
 // Runs once before each integration test file against the PostgreSQL-backed
 // test database configured for the project.
@@ -19,4 +21,6 @@ afterEach(async () => {
 
 afterAll(async () => {
   await sequelize.close();
+  await closeMongo();
+  await prisma.$disconnect();
 });

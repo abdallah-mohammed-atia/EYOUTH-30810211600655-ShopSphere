@@ -119,6 +119,7 @@ export default function AdminDashboardPage() {
         <p>Users: {stats.users}</p>
         <p>Products: {stats.products}</p>
         <p>Categories: {stats.categories}</p>
+        <p>Orders: {stats.orders}</p>
       </section>
 
       <section>

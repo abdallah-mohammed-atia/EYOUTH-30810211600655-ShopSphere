@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import * as cartApi from '../api/cartApi';
+import * as orderApi from '../api/orderApi';
 import { useAuth } from './AuthContext';
 
 const CartContext = createContext(null);
@@ -59,26 +60,41 @@ export function CartProvider({ children }) {
     }
   };
   const clearCart = async () => {
-  setError(null);
-  try {
-    await Promise.all(items.map((item) => cartApi.removeCartItem(item.id)));
-    await refreshCart();
-  } catch (err) {
-    setError('Could not clear the cart.');
-  }
-};
-const value = {
-  items,
-  total,
-  loading,
-  error,
-  itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
-  refreshCart,
-  addItem,
-  updateItem,
-  removeItem,
-  clearCart,
-};
+    setError(null);
+    try {
+      await Promise.all(items.map((item) => cartApi.removeCartItem(item.id)));
+      await refreshCart();
+    } catch (err) {
+      setError('Could not clear the cart.');
+    }
+  };
+
+  const placeOrder = async () => {
+    setError(null);
+    try {
+      const data = await orderApi.createOrder();
+      await refreshCart();
+      return { success: true, order: data.order };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Could not complete the order.';
+      setError(message);
+      return { success: false, message };
+    }
+  };
+
+  const value = {
+    items,
+    total,
+    loading,
+    error,
+    itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
+    refreshCart,
+    addItem,
+    updateItem,
+    removeItem,
+    clearCart,
+    placeOrder,
+  };
 
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

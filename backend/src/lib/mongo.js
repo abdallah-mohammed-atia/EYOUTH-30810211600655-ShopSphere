@@ -17,4 +17,18 @@ async function getMongoDb() {
   return connectMongo();
 }
 
-module.exports = { connectMongo, getMongoDb };
+async function closeMongo() {
+  if (!client) {
+    return;
+  }
+
+  try {
+    await client.close();
+  } catch (err) {
+    // If the client is already closed or unavailable, ignore the error.
+  } finally {
+    db = null;
+  }
+}
+
+module.exports = { connectMongo, getMongoDb, closeMongo };

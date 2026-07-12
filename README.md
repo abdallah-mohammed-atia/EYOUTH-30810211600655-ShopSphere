@@ -83,7 +83,7 @@ Prerequisites: Docker and Docker Compose installed.
 
   1. Copy the root env file:
        cp .env.example .env
-     (edit values if desired — defaults work out of the box)
+     (edit values if desired — replace `JWT_SECRET` with a long, random value; do NOT commit `.env`)
 
   2. From the project root, run:
        docker-compose up --build
@@ -183,6 +183,10 @@ KEY API ENDPOINTS
   PUT    /api/cart/:id             Update a cart item's quantity
   DELETE /api/cart/:id             Remove an item from the cart
 
+  POST   /api/orders               Create an order from the current user's cart
+  GET    /api/orders              List orders for the current authenticated user
+  GET    /api/orders/:id          Get a single order (owner or admin)
+
 
 IMPORTANT NOTES
 --------------------------------------------------------------------------------
@@ -203,5 +207,22 @@ IMPORTANT NOTES
   - CORS is currently open (any origin) for ease of local development and
     grading. Restrict this to your specific frontend domain before any real
     production deployment.
+
+  FINAL DELIVERY CHECKLIST
+  --------------------------------------------------------------------------------
+  The repository includes the following final deliverables and checks to
+  help you deliver the project to reviewers or deploy to staging/production:
+
+  - Tests: Backend unit + integration tests (Jest + Supertest) and frontend
+    component tests (React Testing Library + MSW). Run `npm test` in each
+    package to validate.
+  - Non-destructive migration guide: see [backend/NON_DESTRUCTIVE_MIGRATION.md](backend/NON_DESTRUCTIVE_MIGRATION.md)
+    for safe steps to create and deploy Prisma migrations without `reset`.
+  - Docker & docker-compose: start all services with `docker compose up --build`.
+  - Seed script: `docker compose exec backend npm run seed` creates demo users and products.
+  - README: this file documents setup, testing, and key endpoints for reviewers.
+
+  If you want, I can open a short PR that contains this README update and the
+  migration guide together with a small deploy/run checklist for CI.
 
 ================================================================================

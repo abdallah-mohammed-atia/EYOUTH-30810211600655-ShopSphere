@@ -3,10 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 export default function CartPage() {
-  const { items, total, loading, error, refreshCart, updateItem, removeItem, clearCart } = useCart();
-const navigate = useNavigate();
-const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-const [isOrderPlaced, setIsOrderPlaced] = useState(false);
+  const { items, total, loading, error, refreshCart, updateItem, removeItem, clearCart, placeOrder } = useCart();
+  const navigate = useNavigate();
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isOrderPlaced, setIsOrderPlaced] = useState(false);
+  const [checkoutError, setCheckoutError] = useState(null);
 
   const [discountCode, setDiscountCode] = useState('');
 
@@ -83,45 +84,50 @@ const [isOrderPlaced, setIsOrderPlaced] = useState(false);
             <p className="cart-total">Subtotal: ${Number(total).toFixed(2)}</p>
             <p className="cart-total">Discounted total: ${discountedTotal}</p>
             <div className="checkout-actions">
-  <button type="button" className="button button-secondary" onClick={() => setIsCheckoutOpen(false)}>
-    Close
-  </button>
-  <button
-    type="button"
-    className="button"
-    onClick={() => {
-      setIsCheckoutOpen(false);
-      setIsOrderPlaced(true);
-    }}
-  >
-    Place Order
-  </button>
-</div>
+              <button type="button" className="button button-secondary" onClick={() => setIsCheckoutOpen(false)}>
+                Close
+              </button>
+              <button
+                type="button"
+                className="button"
+                onClick={async () => {
+                  const result = await placeOrder();
+                  if (result.success) {
+                    setCheckoutError(null);
+                    setIsCheckoutOpen(false);
+                    setIsOrderPlaced(true);
+                  } else {
+                    setCheckoutError(result.message || 'Unable to complete the order.');
+                  }
+                }}
+              >
+                Place Order
+              </button>
+            </div>
+            {checkoutError && <p role="alert">{checkoutError}</p>}
           </div>
         </div>
       )}
-      {isOrderPlaced && (
-  <div className="checkout-modal" role="dialog" aria-modal="true">
-    <div className="checkout-modal-card order-success-card">
-      <h2 className="order-success-title">Thanks for Shopping!</h2>
-      <p className="order-success-message">
-        Your order has been placed successfully. We hope you enjoy your new items!
-      </p>
-      <button
-  type="button"
-  className="button order-success-button"
-  onClick={async () => {
-    setIsOrderPlaced(false);
-    await clearCart();
-    navigate('/');
-  }}
->
-  Continue Shopping
-</button>
-      
-    </div>
-  </div>
-)}
+          {isOrderPlaced && (
+        <div className="checkout-modal" role="dialog" aria-modal="true">
+          <div className="checkout-modal-card order-success-card">
+            <h2 className="order-success-title">Thanks for Shopping!</h2>
+            <p className="order-success-message">
+              Your order has been placed successfully. We hope you enjoy your new items!
+            </p>
+            <button
+              type="button"
+              className="button order-success-button"
+              onClick={() => {
+                setIsOrderPlaced(false);
+                navigate('/');
+              }}
+            >
+              Continue Shopping
+            </button>
+          </div>
+        </div>
+      )}
       
     </div>
   );
