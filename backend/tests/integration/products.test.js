@@ -118,6 +118,28 @@ describe('POST /api/products (admin only)', () => {
   });
 });
 
+describe('GET /api/categories', () => {
+  it('returns categories and creates them on demand', async () => {
+    const res = await request(app).get('/api/categories');
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body.items)).toBe(true);
+  });
+});
+
+describe('GET /api/admin/stats', () => {
+  it('returns aggregate statistics for admins', async () => {
+    const token = await registerAndLogin('admin');
+    const res = await request(app)
+      .get('/api/admin/stats')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(
+      expect.objectContaining({ users: expect.any(Number), products: expect.any(Number) })
+    );
+  });
+});
+
 describe('DELETE /api/products/:id (admin only)', () => {
   it('deletes a product as admin', async () => {
     const token = await registerAndLogin('admin');

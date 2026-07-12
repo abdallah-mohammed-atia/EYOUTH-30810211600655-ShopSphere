@@ -1,8 +1,7 @@
 const { sequelize } = require('../../src/models');
 
-// Runs once before each integration test file. Because NODE_ENV=test points
-// Sequelize at an in-memory SQLite DB (see src/config/db.js), this is fast
-// and fully isolated from any real Postgres instance.
+// Runs once before each integration test file against the PostgreSQL-backed
+// test database configured for the project.
 beforeAll(async () => {
   await sequelize.sync({ force: true });
 });
@@ -12,7 +11,9 @@ afterEach(async () => {
   // leak into another, without paying the cost of re-syncing every time.
   const models = sequelize.models;
   await Promise.all(
-    Object.values(models).map((model) => model.destroy({ where: {}, truncate: true, cascade: true }))
+    Object.values(models)
+      .filter((model) => typeof model.destroy === 'function')
+      .map((model) => model.destroy({ where: {}, truncate: true, cascade: true }))
   );
 });
 

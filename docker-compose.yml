@@ -17,6 +17,15 @@ services:
       timeout: 5s
       retries: 5
 
+  mongo:
+    image: mongo:7
+    container_name: ecommerce_mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
   backend:
     build:
       context: ./backend
@@ -30,13 +39,22 @@ services:
       DB_NAME: ${DB_NAME:-ecommerce}
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-ecommerce}?schema=public
+      MONGODB_URI: mongodb://mongo:27017/ecommerce
       JWT_SECRET: ${JWT_SECRET:-change_this_secret_in_production}
       JWT_EXPIRES_IN: 7d
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
     ports:
       - "5000:5000"
     depends_on:
       db:
         condition: service_healthy
+      mongo:
+        condition: service_started
     volumes:
       - ./backend/src/uploads:/app/src/uploads
 
@@ -56,3 +74,4 @@ services:
 volumes:
   db_data:
   backend_uploads:
+  mongo_data:

@@ -14,8 +14,11 @@ application:
   - Admin product management with image upload
   - Frontend pages fully wired to real backend APIs, with loading, empty,
     and error states handled explicitly
+  - User profile update flow and admin dashboard analytics
   - Backend unit and integration tests, frontend component tests
   - Full containerization with Docker and docker-compose
+  - Prisma + PostgreSQL integration, MongoDB-backed review/activity hooks
+  - Profile update support and admin statistics
 
 
 TECHNOLOGIES USED
@@ -28,7 +31,8 @@ Frontend:
 
 Backend:
   - Node.js + Express
-  - PostgreSQL with Sequelize ORM
+  - PostgreSQL with Sequelize ORM and Prisma support
+  - MongoDB for activity logs and reviews
   - JSON Web Tokens (JWT) for authentication
   - bcryptjs for password hashing
   - Multer for image upload handling
@@ -41,7 +45,7 @@ Testing:
 
 DevOps:
   - Docker (separate Dockerfile for frontend and backend)
-  - docker-compose (orchestrates Postgres, backend, and frontend together)
+  - docker-compose (orchestrates Postgres, MongoDB, backend, and frontend together)
   - Nginx (serves the production frontend build)
 
 
@@ -50,12 +54,12 @@ PROJECT STRUCTURE
 ecommerce-platform/
 ├── backend/
 │   ├── src/
-│   │   ├── config/          Database connection (Postgres / SQLite for tests)
-│   │   ├── models/          Sequelize models: User, Product, CartItem
+│   │   ├── config/          Database connection (Postgres; test setup uses PostgreSQL)
+│   │   ├── models/          Sequelize models: User, Product, CartItem, Category
 │   │   ├── middleware/      Auth, role guard, upload, error handling
-│   │   ├── controllers/     Business logic for auth, products, cart
-│   │   ├── routes/          Express route definitions
-│   │   └── utils/           JWT helpers, pagination helper
+│   │   ├── controllers/     Business logic for auth, products, cart, admin stats
+│   │   ├── routes/          Express route definitions for auth, products, cart, admin
+│   │   └── utils/           JWT helpers, pagination helper, mail helper
 │   ├── tests/
 │   │   ├── unit/            Jest unit tests (pure functions, middleware)
 │   │   └── integration/     Supertest API integration tests
@@ -162,6 +166,7 @@ KEY API ENDPOINTS
   POST   /api/auth/register        Register a new customer account
   POST   /api/auth/login           Log in, returns a JWT
   GET    /api/auth/me              Get the current authenticated user
+  PUT    /api/auth/me              Update the current authenticated user profile
 
   GET    /api/products             List products (search, category, sortBy,
                                      order, minPrice, maxPrice, page, limit)
@@ -170,6 +175,8 @@ KEY API ENDPOINTS
                                      multipart image upload)
   PUT    /api/products/:id         Update a product (admin only)
   DELETE /api/products/:id         Delete a product (admin only)
+
+  GET    /api/admin/stats          Get admin overview stats
 
   GET    /api/cart                 Get the current user's cart + total
   POST   /api/cart                 Add an item to the cart

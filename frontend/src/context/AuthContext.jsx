@@ -57,6 +57,19 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const updateProfile = async (payload) => {
+    setError(null);
+    try {
+      const data = await authApi.updateCurrentUser(payload);
+      setUser(data.user);
+      return { success: true };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Profile update failed.';
+      setError(message);
+      return { success: false, message };
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
@@ -68,6 +81,7 @@ export function AuthProvider({ children }) {
     error,
     login,
     register,
+    updateProfile,
     logout,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',

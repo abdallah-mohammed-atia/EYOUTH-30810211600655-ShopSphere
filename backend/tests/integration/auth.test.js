@@ -93,6 +93,22 @@ describe('GET /api/auth/me', () => {
     expect(res.body.user.email).toBe('me@example.com');
   });
 
+  it('updates the current user profile', async () => {
+    const registerRes = await request(app).post('/api/auth/register').send({
+      name: 'Profile User',
+      email: 'profile@example.com',
+      password: 'Password123!',
+    });
+
+    const res = await request(app)
+      .put('/api/auth/me')
+      .set('Authorization', `Bearer ${registerRes.body.token}`)
+      .send({ name: 'Updated Name' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.user.name).toBe('Updated Name');
+  });
+
   it('rejects requests with no token', async () => {
     const res = await request(app).get('/api/auth/me');
     expect(res.status).toBe(401);

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import * as productApi from '../api/productApi';
+import * as authApi from '../api/authApi';
 
 const emptyForm = { name: '', description: '', price: '', category: '', stock: '', image: null };
 
@@ -11,6 +12,7 @@ export default function AdminDashboardPage() {
   const [editId, setEditId] = useState(null);
   const [editForm, setEditForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const [stats, setStats] = useState({ users: 0, products: 0, categories: 0 });
 
   const loadProducts = async () => {
     setStatus('loading');
@@ -26,6 +28,9 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     loadProducts();
+    authApi.getAdminStats()
+      .then((data) => setStats(data))
+      .catch(() => setStats({ users: 0, products: 0, categories: 0 }));
   }, []);
 
   const handleChange = (e) => {
@@ -108,6 +113,13 @@ export default function AdminDashboardPage() {
   return (
     <div className="admin-dashboard">
       <h1>Admin Dashboard</h1>
+
+      <section>
+        <h2>Store Overview</h2>
+        <p>Users: {stats.users}</p>
+        <p>Products: {stats.products}</p>
+        <p>Categories: {stats.categories}</p>
+      </section>
 
       <section>
         <h2>Add New Product</h2>

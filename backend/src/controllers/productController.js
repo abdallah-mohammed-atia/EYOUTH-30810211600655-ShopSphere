@@ -1,7 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 const { Op } = require('sequelize');
-const { Product } = require('../models');
+const { Product, Category } = require('../models');
+const prisma = require('../lib/prisma');
+const { getMongoDb } = require('../lib/mongo');
 const { paginate, buildPaginationMeta } = require('../utils/pagination');
 
 const SORTABLE_FIELDS = ['price', 'name', 'createdAt'];
@@ -135,14 +137,43 @@ async function createProduct(req, res, next) {
 
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
+    const categorySlug = category.toLowerCase().replace(/\s+/g, '-');
+    const [categoryRecord] = await Category.findOrCreate({
+      where: { name: category },
+      defaults: { name: category, slug: categorySlug },
+    });
+
     const product = await Product.create({
       name,
       description,
       price,
       category,
+      categoryId: categoryRecord.id,
       stock: stock || 0,
       imageUrl,
     });
+
+    try {
+      const db = await getMongoDb();
+      await db.collection('activity').insertOne({
+        type: 'product.created',
+        productId: product.id,
+        message: `${product.name} created`,
+        createdAt: new Date(),
+      });
+    } catch (mongoErr) {
+      console.warn('Mongo activity logging unavailable:', mongoErr.message);
+    }
+
+    try {
+      await prisma.category.upsert({
+        where: { name: category },
+        update: {},
+        create: { name: category, slug: category.toLowerCase().replace(/\s+/g, '-') },
+      });
+    } catch (prismaErr) {
+      console.warn('Prisma category sync unavailable:', prismaErr.message);
+    }
 
     return res.status(201).json({ product });
   } catch (err) {

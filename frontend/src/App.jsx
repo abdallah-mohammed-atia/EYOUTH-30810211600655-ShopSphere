@@ -10,6 +10,7 @@ import RegisterPage from './pages/RegisterPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import CartPage from './pages/CartPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import ProfilePage from './pages/ProfilePage';
 
 function NavBar() {
   const { isAuthenticated, isAdmin, user, logout } = useAuth();
@@ -44,6 +45,7 @@ function NavBar() {
       <div className="nav-links">
         <Link to="/" onClick={goHome}>Home</Link>
         {isAuthenticated && <Link to="/cart">Cart ({itemCount})</Link>}
+        {isAuthenticated && <Link to="/profile">Profile</Link>}
         {isAdmin && <Link to="/admin">Admin</Link>}
         <button type="button" onClick={toggleTheme} className="theme-toggle" aria-label="Toggle dark mode">
           {isDarkMode ? '☀️' : '🌙'}
@@ -76,6 +78,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <CartPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
           </ProtectedRoute>
         }
       />
