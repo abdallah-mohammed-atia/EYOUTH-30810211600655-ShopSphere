@@ -1,32 +1,22 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import * as productApi from '../api/productApi';
 import ProductCard from './ProductCard';
 import SearchBar from './SearchBar';
 
 export default function ProductList() {
-  const [products, setProducts] = useState([]);
-  const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
-  const [status, setStatus] = useState('idle'); // idle | loading | success | error
-  const [error, setError] = useState(null);
   const [filters, setFilters] = useState({ search: '', category: '', sortBy: 'createdAt', order: 'ASC', page: 1 });
 
-  const fetchProducts = useCallback(async () => {
-    setStatus('loading');
-    setError(null);
-    try {
-      const data = await productApi.getProducts(filters);
-      setProducts(data.items);
-      setPagination(data.pagination);
-      setStatus('success');
-    } catch (err) {
-      setError('Unable to load products. Please try again later.');
-      setStatus('error');
-    }
-  }, [filters]);
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['products', filters],
+    queryFn: () => productApi.getProducts(filters),
+    keepPreviousData: true,
+    retry: false,
+  });
 
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+  const products = data?.items ?? [];
+  const pagination = data?.pagination ?? { page: 1, totalPages: 1 };
+  const errorMessage = 'Unable to load products. Please try again later.';
 
   const handleSearch = (term) => {
     setFilters((prev) => ({ ...prev, search: term, page: 1 }));
@@ -63,12 +53,12 @@ export default function ProductList() {
         </button>
       </div>
 
-      {status === 'loading' && <p role="status">Loading products...</p>}
-      {status === 'error' && <p role="alert">{error}</p>}
+      {isLoading && <p role="status">Loading products...</p>}
+      {isError && <p role="alert">{errorMessage}</p>}
 
-      {status === 'success' && products.length === 0 && <p>No products found.</p>}
+      {!isLoading && !isError && products.length === 0 && <p>No products found.</p>}
 
-      {status === 'success' && products.length > 0 && (
+      {!isLoading && !isError && products.length > 0 && (
         <>
           <div className="product-grid">
             {products.map((product) => (

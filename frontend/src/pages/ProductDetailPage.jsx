@@ -1,5 +1,6 @@
 ﻿import "./ProductDetailPage.css";
 import React, { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import * as productApi from '../api/productApi';
 import { useCart } from '../context/CartContext';
@@ -12,38 +13,26 @@ export default function ProductDetailPage() {
   const { id } = useParams();
   const { addItem } = useCart();
   const { isAuthenticated, isAdmin } = useAuth();
-  const [product, setProduct] = useState(null);
-  const [status, setStatus] = useState('loading');
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
   const [quantity, setQuantity] = useState(1);
   const [addStatus, setAddStatus] = useState('idle');
   const [priceInput, setPriceInput] = useState('');
   const [adminStatus, setAdminStatus] = useState('idle');
 
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['product', id],
+    queryFn: () => productApi.getProduct(id),
+    enabled: Boolean(id),
+    retry: false,
+  });
+
+  const product = data?.product ?? null;
+
   useEffect(() => {
-    let isMounted = true;
-    setStatus('loading');
-
-    productApi
-      .getProduct(id)
-      .then((data) => {
-        if (isMounted) {
-          setProduct(data.product);
-          setPriceInput(String(data.product?.price ?? ''));
-          setStatus('success');
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setError('Product not found.');
-          setStatus('error');
-        }
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [id]);
+    if (product) {
+      setPriceInput(String(product.price ?? ''));
+    }
+  }, [product]);
 
   const handleAddToCart = async () => {
     setAddStatus('loading');
@@ -61,7 +50,14 @@ export default function ProductDetailPage() {
     setAdminStatus('loading');
     try {
       const updated = await productApi.updateProduct(product.id, { price: numericPrice });
-      setProduct(updated.product || { ...product, price: numericPrice });
+      queryClient.setQueryData(['product', id], (previousData) =>
+        previousData
+          ? {
+              ...previousData,
+              product: updated.product || { ...(previousData.product || product), price: numericPrice },
+            }
+          : previousData
+      );
       setAdminStatus('success');
     } catch (err) {
       setAdminStatus('error');
@@ -73,15 +69,18 @@ export default function ProductDetailPage() {
     setAdminStatus('loading');
     try {
       await productApi.deleteProduct(product.id);
+      queryClient.removeQueries({ queryKey: ['product', id] });
       setAdminStatus('success');
-      setProduct(null);
     } catch (err) {
       setAdminStatus('error');
     }
   };
 
-  if (status === 'loading') return <p role="status">Loading...</p>;
-  if (status === 'error') return <p role="alert">{error}</p>;
+  if (isLoading) return <p role="status">Loading...</p>;
+  if (isError) {
+    const message = error?.message?.includes('404') ? 'Product not found.' : 'Unable to load this product. Please try again.';
+    return <p role="alert">{message}</p>;
+  }
   if (!product) return null;
 
   const apiOrigin = process.env.REACT_APP_API_ORIGIN || 'http://localhost:5000';
