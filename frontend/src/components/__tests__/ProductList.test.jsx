@@ -86,4 +86,17 @@ describe('ProductList', () => {
 
     expect(await screen.findByText(/no products found/i)).toBeInTheDocument();
   });
+
+  it('renders the configured category filter options', async () => {
+    renderWithProviders(<ProductList />);
+
+    expect(await screen.findByText('Running Shoes')).toBeInTheDocument();
+
+    const categorySelect = screen.getByLabelText(/category:/i);
+    expect(categorySelect).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'feetwear' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'electronics' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'gaming' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'clothes' })).toBeInTheDocument();
+  });
 });

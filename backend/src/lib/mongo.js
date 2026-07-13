@@ -31,4 +31,8 @@ async function closeMongo() {
   }
 }
 
-module.exports = { connectMongo, getMongoDb, closeMongo };
+module.exports = {
+    connectMongo,
+    getMongoDb,
+    closeMongo,
+};

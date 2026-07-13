@@ -195,6 +195,15 @@ async function updateProduct(req, res, next) {
       updates.imageUrl = `/uploads/${req.file.filename}`;
     }
 
+    if (updates.category) {
+      const categorySlug = updates.category.toLowerCase().replace(/\s+/g, '-');
+      const [categoryRecord] = await Category.findOrCreate({
+        where: { name: updates.category },
+        defaults: { name: updates.category, slug: categorySlug },
+      });
+      updates.categoryId = categoryRecord.id;
+    }
+
     Object.keys(updates).forEach((key) => updates[key] === undefined && delete updates[key]);
 
     await product.update(updates);

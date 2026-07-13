@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import * as productApi from '../api/productApi';
-import * as categoryApi from '../api/categoryApi';
 import ProductCard from './ProductCard';
 import SearchBar from './SearchBar';
+
+const CATEGORY_OPTIONS = ['feetwear', 'electronics', 'gaming', 'clothes'];
 
 export default function ProductList() {
   const [filters, setFilters] = useState({ search: '', category: '', sortBy: 'createdAt', order: 'ASC', page: 1 });
@@ -19,13 +20,7 @@ export default function ProductList() {
   const pagination = data?.pagination ?? { page: 1, totalPages: 1 };
   const errorMessage = 'Unable to load products. Please try again later.';
 
-  const categoriesQuery = useQuery({
-    queryKey: ['categories'],
-    queryFn: () => categoryApi.getCategories(),
-    retry: false,
-  });
-
-  const categories = categoriesQuery.data?.items ?? [];
+  const categories = CATEGORY_OPTIONS;
 
   const handleSearch = (term) => {
     setFilters((prev) => ({ ...prev, search: term, page: 1 }));
@@ -57,8 +52,8 @@ export default function ProductList() {
           >
             <option value="">All</option>
             {categories.map((category) => (
-              <option key={category.id} value={category.name}>
-                {category.name}
+              <option key={category} value={category}>
+                {category}
               </option>
             ))}
           </select>
@@ -111,9 +106,6 @@ export default function ProductList() {
         </>
       )}
 
-      {categoriesQuery.isError && (
-        <p role="alert">Unable to load categories. Category filter is disabled.</p>
-      )}
     </div>
   );
 }

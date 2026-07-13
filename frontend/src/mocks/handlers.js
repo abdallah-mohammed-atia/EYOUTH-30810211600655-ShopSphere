@@ -3,16 +3,20 @@ import { rest } from 'msw';
 const API_URL = 'http://localhost:5000/api';
 
 export const mockProducts = [
-  { id: 1, name: 'Running Shoes', category: 'shoes', price: '59.99', stock: 10, imageUrl: null },
-  { id: 2, name: 'Hiking Boots', category: 'shoes', price: '129.99', stock: 5, imageUrl: null },
-  { id: 3, name: 'Cotton T-Shirt', category: 'apparel', price: '19.99', stock: 50, imageUrl: null },
+  { id: 1, name: 'Running Shoes', category: 'feetwear', price: '59.99', stock: 10, imageUrl: null },
+  { id: 2, name: 'Hiking Boots', category: 'feetwear', price: '129.99', stock: 5, imageUrl: null },
+  { id: 3, name: 'Cotton T-Shirt', category: 'clothes', price: '19.99', stock: 50, imageUrl: null },
 ];
 
 export const handlers = [
   rest.get(`${API_URL}/products`, (req, res, ctx) => {
     const search = req.url.searchParams.get('search');
+    const category = req.url.searchParams.get('category');
 
     let items = mockProducts;
+    if (category) {
+      items = items.filter((p) => p.category === category);
+    }
     if (search) {
       items = items.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
     }

@@ -9,7 +9,7 @@
  */
 
 require('dotenv').config();
-const { sequelize, User, Product } = require('../src/models');
+const { sequelize, User, Product, Category } = require('../src/models');
 
 const ADMIN = {
   name: 'Admin User',
@@ -57,11 +57,19 @@ async function seed() {
     );
   }
 
-  // Create or update products
+  // Create or update products and categories
   for (const product of SAMPLE_PRODUCTS) {
+    const [categoryRecord] = await Category.findOrCreate({
+      where: { name: product.category },
+      defaults: {
+        name: product.category,
+        slug: product.category.toLowerCase().replace(/\s+/g, '-'),
+      },
+    });
+
     const [item, created] = await Product.findOrCreate({
       where: { name: product.name },
-      defaults: product,
+      defaults: { ...product, categoryId: categoryRecord.id },
     });
 
     if (!created) {
@@ -70,10 +78,11 @@ async function seed() {
         item.description !== product.description ||
         parseFloat(item.price) !== parseFloat(product.price) ||
         item.category !== product.category ||
-        item.stock !== product.stock;
+        item.stock !== product.stock ||
+        item.categoryId !== categoryRecord.id;
 
       if (needsUpdate) {
-        await item.update(product);
+        await item.update({ ...product, categoryId: categoryRecord.id });
         console.log(`Updated product: ${item.name}`);
       } else {
         console.log(`Product already exists: ${item.name}`);
