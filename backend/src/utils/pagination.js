@@ -1,6 +1,6 @@
 /**
- * Converts page/limit query params into Sequelize offset/limit.
- * Defaults: page 1, limit 8. Caps limit at 100 to prevent abuse.
+ * Converts page/limit query params into pagination metadata.
+ * Defaults: page 1, limit 10. Caps limit at 100 to prevent abuse.
  */
 function paginate({ page, limit } = {}) {
   const parsedPage = Math.max(parseInt(page, 10) || 1, 1);

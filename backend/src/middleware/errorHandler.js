@@ -2,10 +2,10 @@
 function errorHandler(err, req, res, next) {
   console.error(err.stack || err.message);
 
-  if (err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError') {
+  if (err.code === 'P2002' || err.code === 'P2003') {
     return res.status(400).json({
       message: 'Validation error.',
-      errors: err.errors ? err.errors.map((e) => e.message) : [err.message],
+      errors: [err.message],
     });
   }
 

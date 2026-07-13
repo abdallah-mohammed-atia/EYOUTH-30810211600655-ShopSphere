@@ -1,7 +1,7 @@
 const request = require('supertest');
 require('./setup');
 const app = require('../../src/app');
-const { Product } = require('../../src/models');
+const prisma = require('../../src/lib/prisma');
 
 async function registerAndLogin() {
   const email = `order-${Date.now()}-${Math.random()}@example.com`;
@@ -19,7 +19,7 @@ describe('Order API', () => {
 
   beforeEach(async () => {
     token = await registerAndLogin();
-    product = await Product.create({ name: 'Order Item', category: 'orders', price: 19.99, stock: 10 });
+    product = await prisma.product.create({ data: { name: 'Order Item', category: 'orders', price: 19.99, stock: 10 } });
   });
 
   it('creates an order from the cart and empties the cart', async () => {

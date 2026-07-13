@@ -1,7 +1,7 @@
 require('dotenv').config();
 
+const path = require('path');
 const app = require('./app');
-const { sequelize } = require('./models');
 const { connectMongo } = require('./lib/mongo');
 const prisma = require('./lib/prisma');
 const { execSync } = require('child_process');
@@ -10,23 +10,12 @@ const PORT = process.env.PORT || 5000;
 
 async function start() {
   try {
-    // PostgreSQL
-    await sequelize.authenticate();
-    console.log('PostgreSQL connection established.');
-
-    // MongoDB
     await connectMongo();
     console.log('MongoDB connection established.');
 
-    // Ensure Prisma client can connect
-    try {
-      await prisma.$connect();
-      console.log('Prisma client connected.');
-    } catch (pErr) {
-      console.warn('Prisma client connect failed:', pErr.message);
-    }
+    await prisma.$connect();
+    console.log('Prisma client connected.');
 
-    // Run Prisma migrations/deploy (best-effort) so Prisma tables exist in CI and runtime.
     if (process.env.PRISMA_MIGRATE !== 'false') {
       try {
         console.log('Running Prisma migrations (deploy)...');
@@ -37,12 +26,17 @@ async function start() {
       }
     }
 
-    // Sync Sequelize models in development only
-    if (process.env.NODE_ENV === 'development') {
-      await sequelize.sync({ alter: true });
-      console.log('Development sync completed.');
-    } else {
-      console.log('Production mode: skipping Sequelize schema sync (use migrations).');
+    try {
+      const productCount = await prisma.product.count();
+      if (productCount === 0) {
+        console.log('No products found. Seeding sample catalog...');
+        execSync('node scripts/seed.js', {
+          stdio: 'inherit',
+          cwd: path.resolve(__dirname, '..'),
+        });
+      }
+    } catch (seedErr) {
+      console.warn('Catalog seeding skipped:', seedErr.message);
     }
 
     app.listen(PORT, () => {

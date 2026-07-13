@@ -48,10 +48,26 @@ jobs:
         working-directory: backend
         run: npm ci
 
+      - name: Prepare Prisma and DB
+        working-directory: backend
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ecommerce?schema=public
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: ecommerce
+          MONGODB_URI: mongodb://localhost:27017/ecommerce
+        run: |
+          npx prisma generate
+          npx prisma migrate deploy
+
       - name: Run backend tests
         working-directory: backend
         env:
           NODE_ENV: test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ecommerce?schema=public
           DB_HOST: localhost
           DB_PORT: 5432
           DB_USER: postgres

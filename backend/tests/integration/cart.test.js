@@ -1,7 +1,7 @@
 const request = require('supertest');
 require('./setup');
 const app = require('../../src/app');
-const { Product } = require('../../src/models');
+const prisma = require('../../src/lib/prisma');
 
 async function registerAndLogin() {
   const email = `cart-user-${Date.now()}-${Math.random()}@example.com`;
@@ -21,7 +21,7 @@ describe('Cart endpoints', () => {
 
   it('adds an item to the cart', async () => {
     const token = await registerAndLogin();
-    const product = await Product.create({ name: 'Cart Item', category: 'misc', price: 10 });
+    const product = await prisma.product.create({ data: { name: 'Cart Item', category: 'misc', price: 10 } });
 
     const res = await request(app)
       .post('/api/cart')
@@ -34,7 +34,7 @@ describe('Cart endpoints', () => {
 
   it('increments quantity when adding the same product twice', async () => {
     const token = await registerAndLogin();
-    const product = await Product.create({ name: 'Repeat Item', category: 'misc', price: 10 });
+    const product = await prisma.product.create({ data: { name: 'Repeat Item', category: 'misc', price: 10 } });
 
     await request(app)
       .post('/api/cart')
@@ -62,8 +62,8 @@ describe('Cart endpoints', () => {
 
   it('calculates the correct cart total', async () => {
     const token = await registerAndLogin();
-    const productA = await Product.create({ name: 'A', category: 'misc', price: 10 });
-    const productB = await Product.create({ name: 'B', category: 'misc', price: 5 });
+    const productA = await prisma.product.create({ data: { name: 'A', category: 'misc', price: 10 } });
+    const productB = await prisma.product.create({ data: { name: 'B', category: 'misc', price: 5 } });
 
     await request(app).post('/api/cart').set('Authorization', `Bearer ${token}`).send({ productId: productA.id, quantity: 2 });
     await request(app).post('/api/cart').set('Authorization', `Bearer ${token}`).send({ productId: productB.id, quantity: 3 });
@@ -76,7 +76,7 @@ describe('Cart endpoints', () => {
 
   it('updates a cart item quantity', async () => {
     const token = await registerAndLogin();
-    const product = await Product.create({ name: 'Update Item', category: 'misc', price: 10 });
+    const product = await prisma.product.create({ data: { name: 'Update Item', category: 'misc', price: 10 } });
 
     const addRes = await request(app)
       .post('/api/cart')
@@ -94,7 +94,7 @@ describe('Cart endpoints', () => {
 
   it('removes a cart item', async () => {
     const token = await registerAndLogin();
-    const product = await Product.create({ name: 'Remove Item', category: 'misc', price: 10 });
+    const product = await prisma.product.create({ data: { name: 'Remove Item', category: 'misc', price: 10 } });
 
     const addRes = await request(app)
       .post('/api/cart')
@@ -114,7 +114,7 @@ describe('Cart endpoints', () => {
   it('does not allow a user to modify another user\'s cart item', async () => {
     const tokenA = await registerAndLogin();
     const tokenB = await registerAndLogin();
-    const product = await Product.create({ name: 'Isolated Item', category: 'misc', price: 10 });
+    const product = await prisma.product.create({ data: { name: 'Isolated Item', category: 'misc', price: 10 } });
 
     const addRes = await request(app)
       .post('/api/cart')

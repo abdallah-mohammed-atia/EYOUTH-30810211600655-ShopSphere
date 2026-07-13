@@ -4,6 +4,7 @@
   "description": "Backend API for the Full-Stack E-Commerce Capstone Project",
   "main": "src/server.js",
   "scripts": {
+    "pretest": "prisma generate && prisma migrate deploy",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "cross-env NODE_ENV=test jest --runInBand --coverage",
@@ -25,8 +26,7 @@
     "nodemailer": "^6.9.0",
     "pg": "^8.12.0",
     "pg-hstore": "^2.3.4",
-    "prisma": "^5.4.1",
-    "sequelize": "^6.37.3"
+    "prisma": "^5.4.1"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",

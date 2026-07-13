@@ -4,12 +4,11 @@
  *
  * Run with:
  * npm run seed
- *
- * Safe to re-run: existing records are updated if needed.
  */
 
 require('dotenv').config();
-const { sequelize, User, Product, Category } = require('../src/models');
+const bcrypt = require('bcryptjs');
+const prisma = require('../src/lib/prisma');
 
 const ADMIN = {
   name: 'Admin User',
@@ -39,60 +38,48 @@ const SAMPLE_PRODUCTS = [
   { name: 'football', description: 'official 25/26 laliga ball', price: 44.99, category: 'sports', stock: 5, imageUrl: '/uploads/seed-images/football.png' },
 ];
 
-
 async function seed() {
-  await sequelize.sync();
+  await prisma.$connect();
 
-  // Create admin and customer accounts
   for (const account of [ADMIN, CUSTOMER]) {
-    const [user, created] = await User.findOrCreate({
-      where: { email: account.email },
-      defaults: account,
-    });
-
-    console.log(
-      created
-        ? `Created ${account.role}: ${user.email}`
-        : `${account.role} already exists: ${user.email}`
-    );
-  }
-
-  // Create or update products and categories
-  for (const product of SAMPLE_PRODUCTS) {
-    const [categoryRecord] = await Category.findOrCreate({
-      where: { name: product.category },
-      defaults: {
-        name: product.category,
-        slug: product.category.toLowerCase().replace(/\s+/g, '-'),
-      },
-    });
-
-    const [item, created] = await Product.findOrCreate({
-      where: { name: product.name },
-      defaults: { ...product, categoryId: categoryRecord.id },
-    });
-
-    if (!created) {
-      const needsUpdate =
-        item.imageUrl !== product.imageUrl ||
-        item.description !== product.description ||
-        parseFloat(item.price) !== parseFloat(product.price) ||
-        item.category !== product.category ||
-        item.stock !== product.stock ||
-        item.categoryId !== categoryRecord.id;
-
-      if (needsUpdate) {
-        await item.update({ ...product, categoryId: categoryRecord.id });
-        console.log(`Updated product: ${item.name}`);
-      } else {
-        console.log(`Product already exists: ${item.name}`);
-      }
+    const existing = await prisma.user.findUnique({ where: { email: account.email } });
+    if (!existing) {
+      await prisma.user.create({ data: { ...account, password: await bcrypt.hash(account.password, 10) } });
+      console.log(`Created ${account.role}: ${account.email}`);
     } else {
-      console.log(`Created product: ${item.name}`);
+      console.log(`${account.role} already exists: ${account.email}`);
     }
   }
 
-  await sequelize.close();
+  for (const product of SAMPLE_PRODUCTS) {
+    const slug = product.category.toLowerCase().replace(/\s+/g, '-');
+    await prisma.category.upsert({
+      where: { name: product.category },
+      update: { slug },
+      create: { name: product.category, slug },
+    });
+
+    const categoryRecord = await prisma.category.findUnique({ where: { name: product.category } });
+    const existingProduct = await prisma.product.findFirst({ where: { name: product.name } });
+
+    if (!existingProduct) {
+      await prisma.product.create({
+        data: {
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          category: product.category,
+          categoryId: categoryRecord.id,
+          stock: product.stock,
+          imageUrl: product.imageUrl,
+        },
+      });
+      console.log(`Created product: ${product.name}`);
+    } else {
+      console.log(`Product already exists: ${product.name}`);
+    }
+  }
+
   console.log('Seeding complete.');
 }
 
@@ -100,7 +87,6 @@ seed().catch((err) => {
   console.error('Seeding failed:', err);
   process.exit(1);
 });
-
 
 
 

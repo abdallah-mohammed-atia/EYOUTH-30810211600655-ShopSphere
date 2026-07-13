@@ -1,7 +1,7 @@
 const request = require('supertest');
 require('./setup');
 const app = require('../../src/app');
-const { Product } = require('../../src/models');
+const prisma = require('../../src/lib/prisma');
 
 async function registerAndLogin(role = 'customer') {
   const email = `${role}-${Date.now()}-${Math.random()}@example.com`;
@@ -16,11 +16,13 @@ async function registerAndLogin(role = 'customer') {
 
 describe('GET /api/products', () => {
   beforeEach(async () => {
-    await Product.bulkCreate([
-      { name: 'Running Shoes', category: 'shoes', price: 59.99, stock: 10 },
-      { name: 'Hiking Boots', category: 'shoes', price: 129.99, stock: 5 },
-      { name: 'Cotton T-Shirt', category: 'apparel', price: 19.99, stock: 50 },
-    ]);
+    await prisma.product.createMany({
+      data: [
+        { name: 'Running Shoes', category: 'shoes', price: 59.99, stock: 10 },
+        { name: 'Hiking Boots', category: 'shoes', price: 129.99, stock: 5 },
+        { name: 'Cotton T-Shirt', category: 'apparel', price: 19.99, stock: 50 },
+      ],
+    });
   });
 
   it('returns all products with default pagination', async () => {
@@ -75,7 +77,7 @@ describe('GET /api/products', () => {
 
 describe('GET /api/products/:id', () => {
   it('returns a single product', async () => {
-    const product = await Product.create({ name: 'Solo Item', category: 'misc', price: 9.99 });
+    const product = await prisma.product.create({ data: { name: 'Solo Item', category: 'misc', price: 9.99 } });
     const res = await request(app).get(`/api/products/${product.id}`);
     expect(res.status).toBe(200);
     expect(res.body.product.name).toBe('Solo Item');
@@ -143,14 +145,14 @@ describe('GET /api/admin/stats', () => {
 describe('DELETE /api/products/:id (admin only)', () => {
   it('deletes a product as admin', async () => {
     const token = await registerAndLogin('admin');
-    const product = await Product.create({ name: 'To Delete', category: 'misc', price: 5 });
+    const product = await prisma.product.create({ data: { name: 'To Delete', category: 'misc', price: 5 } });
 
     const res = await request(app)
       .delete(`/api/products/${product.id}`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(204);
-    const found = await Product.findByPk(product.id);
+    const found = await prisma.product.findUnique({ where: { id: product.id } });
     expect(found).toBeNull();
   });
 });

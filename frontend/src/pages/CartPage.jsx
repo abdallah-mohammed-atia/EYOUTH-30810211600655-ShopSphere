@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 export default function CartPage() {
-  const { items, total, loading, error, refreshCart, updateItem, removeItem, clearCart, placeOrder } = useCart();
+  const { items, total, loading, error, refreshCart, updateItem, removeItem, placeOrder } = useCart();
   const navigate = useNavigate();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isOrderPlaced, setIsOrderPlaced] = useState(false);

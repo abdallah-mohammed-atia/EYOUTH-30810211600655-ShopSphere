@@ -1,5 +1,5 @@
 const { verifyToken } = require('../utils/jwt');
-const { User } = require('../models');
+const prisma = require('../lib/prisma');
 
 async function requireAuth(req, res, next) {
   try {
@@ -11,7 +11,7 @@ async function requireAuth(req, res, next) {
     }
 
     const decoded = verifyToken(token);
-    const user = await User.findByPk(decoded.id);
+    const user = await prisma.user.findUnique({ where: { id: decoded.id } });
 
     if (!user) {
       return res.status(401).json({ message: 'User no longer exists.' });
