@@ -2,31 +2,62 @@ name: CI
 
 on:
   push:
-    branches: [ main, final/delivery ]
+    branches: [ main, master, final/delivery ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
 
 jobs:
   backend-tests:
-    name: Backend tests
+    name: Backend tests (Postgres + Mongo services)
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [20]
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ecommerce
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
+      mongo:
+        image: mongo:6
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand({ ping: 1 })'" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Wait for DBs
+        run: |
+          echo "Waiting for Postgres and Mongo to be ready..."
+          for i in {1..15}; do
+            pg_isready -h localhost -p 5432 -U postgres && break || sleep 2
+          done
+
       - name: Install backend deps
         working-directory: backend
-        run: |
-          npm ci
+        run: npm ci
+
       - name: Run backend tests
         working-directory: backend
         env:
           NODE_ENV: test
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: ecommerce
+          MONGODB_URI: mongodb://localhost:27017/ecommerce
         run: |
           npm test -- --runInBand
 
@@ -45,51 +76,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install frontend deps
         working-directory: frontend
-        run: |
-          npm ci
+        run: npm ci
       - name: Run frontend tests
         working-directory: frontend
         env:
           CI: 'true'
-        run: |
-          npm test -- --watchAll=false
-name: CI
-
-on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-
-jobs:
-  backend-tests:
-    name: Backend tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Install backend dependencies
-        working-directory: backend
-        run: npm ci
-      - name: Run backend tests
-        working-directory: backend
-        run: npm test
-
-  frontend-tests:
-    name: Frontend tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm ci
-      - name: Run frontend tests
-        working-directory: frontend
         run: npm test -- --watchAll=false
