@@ -142,7 +142,7 @@ PROJECT URLS
   Frontend (local):        http://localhost:3000
   Backend API (local):     http://localhost:5000/api
   API Health Check:        http://localhost:5000/api/health
-  GitHub Repository:       https://github.com/abdallah-mohammed-atia/project.git
+  GitHub Repository:       https://github.com/abdallah-mohammed-atia/fullstack-ecommerce-abdallah-mohammed-atia.git
 
 
 TEST ACCOUNT CREDENTIALS

@@ -1,0 +1,31 @@
+name: Validate Naming and Visibility
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for Student ID naming
+        run: |
+          set -e
+          echo "Checking repository for paths containing '-ShopSphere'..."
+          matches=$(git ls-files | grep -i -- '-ShopSphere' || true)
+          if [ -z "$matches" ]; then
+            echo "ERROR: No files or paths containing '-ShopSphere' found. Ensure files/directories follow the Student ID-ShopSphere naming rule." >&2
+            exit 1
+          fi
+          echo "Found matching paths:" 
+          echo "$matches"
+
+      - name: Check for 'Student ID-ShopSphere' text presence
+        run: |
+          if ! git grep -F "Student ID-ShopSphere" --quiet; then
+            echo "ERROR: No occurrences of the literal text 'Student ID-ShopSphere' found in repository files. Add a visible file or README section containing the exact phrase." >&2
+            exit 1
+          fi
+          echo "Naming and visibility checks passed."
