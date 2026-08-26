@@ -10,11 +10,6 @@ Quick steps to deploy the frontend on Vercel and connect backend/DB (Supabase):
    - Environment variables (add in Vercel Project > Settings > Environment Variables):
      - `REACT_APP_API_ORIGIN` = your backend API URL (e.g. `https://api.example.com`)
      - Any keys required by the frontend: `SUPABASE_URL`, `SUPABASE_ANON_KEY` (if used by client)
-  
-GitHub Action (automated deploy)
-   - A workflow exists at `.github/workflows/vercel-deploy.yml` that builds the frontend and deploys to Vercel on pushes to `main`.
-   - The workflow expects these repository secrets to be configured in GitHub: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
-   - To add those in GitHub: Repository -> Settings -> Secrets -> Actions -> New repository secret.
 
 2. Backend / Supabase
    - If you use Supabase for the database, ensure `DATABASE_URL` (Postgres) is available to your backend deployment.
