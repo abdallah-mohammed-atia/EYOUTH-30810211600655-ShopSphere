@@ -225,10 +225,4 @@ IMPORTANT NOTES
   If you want, I can open a short PR that contains this README update and the
   migration guide together with a small deploy/run checklist for CI.
 
-## Level 5 Final Project — ShopSphere Enterprise
-
-This repository is the starting point for the Level 5 final project: **ShopSphere Enterprise — Production and Cloud Modernization**. The final project focuses on preparing the existing ShopSphere application for production by applying secure, scalable, and observable practices. Work is divided into four ordered tasks: production deployment, cloud preparation, application modernization, and production operations. Two rules apply to every deliverable: the *Student ID-ShopSphere* naming rule, and the *visibility rule* which requires that all claimed work be visible in the submitted deliverable.
-
-If you'd like, open a PR with these docs and I can add a lightweight CI check that verifies the naming rule and a short checklist for each task.
-
 ================================================================================
