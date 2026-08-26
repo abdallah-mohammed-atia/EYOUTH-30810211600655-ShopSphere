@@ -17,7 +17,6 @@ jobs:
       postgres:
         image: postgres:15
         env:
-<<<<<<< HEAD
           POSTGRES_USER: ${{ secrets.CI_DB_USER }}
           POSTGRES_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
           POSTGRES_DB: ${{ secrets.CI_DB_NAME }}
@@ -25,15 +24,6 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd "pg_isready -U ${{ secrets.CI_DB_USER }}" --health-interval 10s --health-timeout 5s --health-retries 5
-=======
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: ecommerce
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
->>>>>>> submission/main
       mongo:
         image: mongo:6
         ports:
@@ -62,7 +52,6 @@ jobs:
         working-directory: backend
         env:
           NODE_ENV: test
-<<<<<<< HEAD
           DATABASE_URL: ${{ secrets.CI_DATABASE_URL }}
           DB_HOST: localhost
           DB_PORT: 5432
@@ -70,15 +59,6 @@ jobs:
           DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
           DB_NAME: ${{ secrets.CI_DB_NAME }}
           MONGODB_URI: ${{ secrets.CI_MONGODB_URI }}
-=======
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ecommerce?schema=public
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USER: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: ecommerce
-          MONGODB_URI: mongodb://localhost:27017/ecommerce
->>>>>>> submission/main
         run: |
           npx prisma generate
           npx prisma migrate deploy
@@ -87,7 +67,6 @@ jobs:
         working-directory: backend
         env:
           NODE_ENV: test
-<<<<<<< HEAD
           DATABASE_URL: ${{ secrets.CI_DATABASE_URL }}
           DB_HOST: localhost
           DB_PORT: 5432
@@ -95,15 +74,6 @@ jobs:
           DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
           DB_NAME: ${{ secrets.CI_DB_NAME }}
           MONGODB_URI: ${{ secrets.CI_MONGODB_URI }}
-=======
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ecommerce?schema=public
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USER: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: ecommerce
-          MONGODB_URI: mongodb://localhost:27017/ecommerce
->>>>>>> submission/main
         run: |
           npm test -- --runInBand
 
@@ -128,7 +98,6 @@ jobs:
         env:
           CI: 'true'
         run: npm test -- --watchAll=false
-<<<<<<< HEAD
 
   deploy-to-vercel:
     name: Deploy to Vercel (production)
@@ -155,5 +124,4 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
           vercel-args: '--cwd frontend --prod'
-=======
 >>>>>>> submission/main
