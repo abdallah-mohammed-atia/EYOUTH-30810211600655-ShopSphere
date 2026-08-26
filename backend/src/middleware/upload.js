@@ -1,19 +1,13 @@
 const multer = require('multer');
-const path = require('path');
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '..', 'uploads'));
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const ext = path.extname(file.originalname);
-    cb(null, `${uniqueSuffix}${ext}`);
-  },
-});
+// Files are held in memory only, then uploaded to Vercel Blob storage by the
+// controller. Vercel's filesystem is read-only (aside from /tmp, which does
+// not persist between invocations), so writing to local disk here would
+// silently lose every uploaded image in production.
+const storage = multer.memoryStorage();
 
 function fileFilter(req, file, cb) {
   if (ALLOWED_TYPES.includes(file.mimetype)) {

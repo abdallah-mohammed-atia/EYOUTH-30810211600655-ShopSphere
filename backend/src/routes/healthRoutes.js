@@ -6,13 +6,25 @@ const router = express.Router();
 
 router.get('/health', async (req, res) => {
   try {
-    const mongoDb = await getMongoDb();
-    const mongoStatus = mongoDb ? 'ok' : 'down';
     await prisma.$queryRaw`SELECT 1`;
-    return res.status(200).json({ status: 'ok', postgres: 'ok', mongodb: mongoStatus });
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: err.message });
+    return res.status(500).json({ status: 'error', postgres: 'down', message: err.message });
   }
+
+  let mongoStatus = 'down';
+  try {
+    const mongoDb = await getMongoDb();
+    mongoStatus = mongoDb ? 'ok' : 'down';
+  } catch (err) {
+    mongoStatus = 'down';
+  }
+
+  return res.status(200).json({
+    status: 'ok',
+    postgres: 'ok',
+    mongodb: mongoStatus,
+    timestamp: new Date().toISOString(),
+  });
 });
 
 module.exports = router;

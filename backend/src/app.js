@@ -52,9 +52,7 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+app.use('/api', healthRoutes);
 app.use('/health', healthRoutes);
 
 // Root API info to help clients hitting `/api` directly.
