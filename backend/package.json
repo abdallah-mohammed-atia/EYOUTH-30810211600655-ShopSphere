@@ -6,6 +6,7 @@
   "scripts": {
     "pretest": "prisma generate && prisma migrate deploy",
     "start": "node src/server.js",
+    "postinstall": "prisma generate",
     "dev": "nodemon src/server.js",
     "test": "cross-env NODE_ENV=test jest --runInBand --coverage",
     "test:watch": "cross-env NODE_ENV=test jest --runInBand --watch",
