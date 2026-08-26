@@ -226,3 +226,36 @@ IMPORTANT NOTES
   migration guide together with a small deploy/run checklist for CI.
 
 ================================================================================
+<<<<<<< HEAD
+
+SUBMISSION & DEPLOYMENT (final checklist)
+--------------------------------------------------------------------------------
+Follow these steps to prepare the project for final submission and production deployment.
+
+1) Create a Supabase project and copy the Postgres connection string to use as `DATABASE_URL`.
+
+2) Create two Vercel projects:
+   - Backend: set Root Directory to `backend` and add production environment variables (see `DEPLOYMENT.md`).
+   - Frontend: set Root Directory to `frontend` and set `REACT_APP_API_ORIGIN` to your backend URL.
+
+3) Deploy the review service separately (folder `services/review-service`) and set `REVIEW_SERVICE_URL` in backend Vercel.
+
+4) Add the required GitHub Secrets (if you want CI to deploy): `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID_BACKEND`, `VERCEL_PROJECT_ID_FRONTEND`, and the CI database secrets (`CI_DATABASE_URL`, `CI_DB_USER`, `CI_DB_PASSWORD`, `CI_DB_NAME`, `CI_MONGODB_URI`).
+
+5) Run migrations against Supabase and seed data:
+```bash
+# set DATABASE_URL locally then:
+cd backend
+npx prisma generate
+npx prisma migrate deploy
+node scripts/seed.js
+```
+
+6) Create a branch, push and open a PR to `main`. Merge when CI passes to trigger the deploy job.
+
+7) Register an UptimeRobot monitor for `https://<BACKEND_URL>/api/health`.
+
+8) Finalize `EYOUTH-30810211600655-ShopSphere-links.md` with the public URLs and share it as viewable by anyone.
+
+=======
+>>>>>>> submission/main

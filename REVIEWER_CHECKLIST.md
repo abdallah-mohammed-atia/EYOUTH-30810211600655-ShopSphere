@@ -55,4 +55,23 @@ If something fails
 - Capture the failing command and its complete stdout/stderr.
 - Note whether the failure is environment-specific (e.g., Windows file locks) and suggest a repro on Linux if necessary.
 
+<<<<<<< HEAD
+Production verification (what the evaluator will check)
+---------------------------------------------------
+- Frontend and backend are reachable at public URLs (HTTPS) and load without build/runtime errors.
+- The backend `/api/health` endpoint returns 200 from the public URL.
+- The deployed backend uses Supabase Postgres for reads and writes (no local DB in production).
+- Secrets are stored as environment variables in Vercel / GitHub Secrets; no secret values appear in the repository.
+- Security protections active on the deployed backend: HTTPS, CORS restricted to the frontend domain, Helmet headers present, and rate limiting in effect.
+- The review service runs at its own URL and the main app fetches reviews from it (if configured with `USE_EXTERNAL_REVIEW_SERVICE=true`).
+
+Evidence required for submission:
+- Public frontend URL
+- Public backend URL (API)
+- UptimeRobot monitor link or screenshot for the health endpoint
+- `EYOUTH-30810211655-ShopSphere-links.md` with the three public URLs and shared with anyone who has the link
+
+
+=======
+>>>>>>> submission/main
 -- End of checklist

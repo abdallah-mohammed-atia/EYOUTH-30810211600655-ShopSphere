@@ -1,6 +1,13 @@
 /* eslint-disable no-unused-vars */
+<<<<<<< HEAD
+const logger = require('../lib/logger');
+
+function errorHandler(err, req, res, next) {
+  logger.error({ err: err.message || err, stack: err.stack || null }, 'Unhandled error');
+=======
 function errorHandler(err, req, res, next) {
   console.error(err.stack || err.message);
+>>>>>>> submission/main
 
   if (err.code === 'P2002' || err.code === 'P2003') {
     return res.status(400).json({
