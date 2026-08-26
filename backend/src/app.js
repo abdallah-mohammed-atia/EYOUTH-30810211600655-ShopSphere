@@ -1,11 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-<<<<<<< HEAD
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-=======
->>>>>>> submission/main
 
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
@@ -16,8 +13,6 @@ const adminRoutes = require('./routes/adminRoutes');
 const healthRoutes = require('./routes/healthRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
-
-<<<<<<< HEAD
 const logger = require('./lib/logger');
 
 const app = express();
@@ -43,13 +38,7 @@ app.use((req, res, next) => {
   logger.info({ method: req.method, url: req.originalUrl, ip: req.ip }, 'incoming request');
   next();
 });
-=======
-const app = express();
 
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
->>>>>>> submission/main
 const uploadsPath = path.join(__dirname, 'uploads');
 const seedImagesPath = path.join(__dirname, 'seed-images');
 
@@ -79,7 +68,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/categories', categoryRoutes);
-<<<<<<< HEAD
+
 // Reviews: either proxy to external review service or mount internal routes
 if (process.env.USE_EXTERNAL_REVIEW_SERVICE === 'true' && process.env.REVIEW_SERVICE_URL) {
   const fetch = require('node-fetch');
@@ -101,9 +90,7 @@ if (process.env.USE_EXTERNAL_REVIEW_SERVICE === 'true' && process.env.REVIEW_SER
 } else {
   app.use('/api/reviews', reviewRoutes);
 }
-=======
-app.use('/api/reviews', reviewRoutes);
->>>>>>> submission/main
+
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 
