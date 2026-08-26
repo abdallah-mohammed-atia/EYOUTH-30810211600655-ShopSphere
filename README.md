@@ -226,6 +226,7 @@ IMPORTANT NOTES
   migration guide together with a small deploy/run checklist for CI.
 
 ================================================================================
+<<<<<<< HEAD
 
 SUBMISSION & DEPLOYMENT (final checklist)
 --------------------------------------------------------------------------------
@@ -256,3 +257,5 @@ node scripts/seed.js
 
 8) Finalize `EYOUTH-30810211600655-ShopSphere-links.md` with the public URLs and share it as viewable by anyone.
 
+=======
+>>>>>>> submission/main

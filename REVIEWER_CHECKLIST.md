@@ -55,6 +55,7 @@ If something fails
 - Capture the failing command and its complete stdout/stderr.
 - Note whether the failure is environment-specific (e.g., Windows file locks) and suggest a repro on Linux if necessary.
 
+<<<<<<< HEAD
 Production verification (what the evaluator will check)
 ---------------------------------------------------
 - Frontend and backend are reachable at public URLs (HTTPS) and load without build/runtime errors.
@@ -71,4 +72,6 @@ Evidence required for submission:
 - `EYOUTH-30810211655-ShopSphere-links.md` with the three public URLs and shared with anyone who has the link
 
 
+=======
+>>>>>>> submission/main
 -- End of checklist
