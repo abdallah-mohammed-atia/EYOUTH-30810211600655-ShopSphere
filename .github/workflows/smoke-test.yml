@@ -1,0 +1,34 @@
+name: Smoke Test
+
+on:
+  pull_request:
+    branches: [ main, final/delivery ]
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Compose
+        run: |
+          sudo apt-get update && sudo apt-get install -y docker-compose
+      - name: Start stack
+        run: |
+          docker compose up --build -d
+      - name: Wait for API
+        run: |
+          for i in {1..30}; do
+            if curl -sSf http://localhost:5000/api/health >/dev/null 2>&1; then
+              echo 'API is up'; break
+            fi
+            echo 'Waiting for API...'; sleep 2
+          done
+      - name: Run smoke checks
+        run: |
+          curl -sSf http://localhost:5000/api/products | jq '.items | length' > /tmp/products_count
+          echo "Products: $(cat /tmp/products_count)"
+      - name: Tear down
+        if: always()
+        run: |
+          docker compose down -v

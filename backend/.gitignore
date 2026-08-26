@@ -1,0 +1,9 @@
+node_modules/
+.env
+coverage/
+src/uploads/*
+!src/uploads/.gitkeep
+!src/uploads/seed-images/
+!src/uploads/seed-images/**
+npm-debug.log*
+.DS_Store
