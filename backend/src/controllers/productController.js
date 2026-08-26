@@ -1,8 +1,7 @@
-const fs = require('fs');
-const path = require('path');
 const prisma = require('../lib/prisma');
 const { getMongoDb } = require('../lib/mongo');
 const { paginate, buildPaginationMeta } = require('../utils/pagination');
+const { uploadProductImage } = require('../lib/blobStorage');
 
 const SORTABLE_FIELDS = ['price', 'name', 'createdAt'];
 const PLACEHOLDER_IMAGE =
@@ -12,6 +11,10 @@ function getFallbackProductImage() {
   return PLACEHOLDER_IMAGE;
 }
 
+// Blob URLs are already absolute and are returned as-is. Bundled seed images
+// are still served locally (as read-only static assets shipped with the
+// deploy) via a relative path like /seed-images/x.png, so those are resolved
+// against the current request's host.
 function resolveImageUrl(req, imageUrl) {
   if (!imageUrl || typeof imageUrl !== 'string') return imageUrl;
   if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
@@ -21,19 +24,9 @@ function resolveImageUrl(req, imageUrl) {
   return `${protocol}://${host}${imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`}`;
 }
 
-function uploadImageExists(imageUrl) {
-  if (!imageUrl || typeof imageUrl !== 'string') return false;
-  if (!imageUrl.startsWith('/uploads/')) return false;
-  const relativePath = imageUrl.replace('/uploads/', '');
-  const filePath = path.join(__dirname, '..', 'uploads', relativePath);
-  return fs.existsSync(filePath);
-}
-
 function withFallbackImage(product, req) {
   const json = product && typeof product.toJSON === 'function' ? product.toJSON() : { ...product };
-  let imageUrl = json.imageUrl || null;
-  if (imageUrl && imageUrl.startsWith('/uploads/') && !uploadImageExists(imageUrl)) imageUrl = null;
-  if (!imageUrl) imageUrl = getFallbackProductImage(json.name);
+  const imageUrl = json.imageUrl || getFallbackProductImage(json.name);
   json.imageUrl = resolveImageUrl(req, imageUrl);
   return json;
 }
@@ -92,7 +85,7 @@ async function createProduct(req, res, next) {
       return res.status(400).json({ message: 'Name, price, and category are required.' });
     }
 
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+    const imageUrl = req.file ? await uploadProductImage(req.file) : null;
     const categorySlug = category.toLowerCase().replace(/\s+/g, '-');
     await prisma.category.upsert({ where: { name: category }, update: {}, create: { name: category, slug: categorySlug } });
 
@@ -141,7 +134,7 @@ async function updateProduct(req, res, next) {
     if (description !== undefined) data.description = description;
     if (price !== undefined) data.price = parseFloat(price);
     if (stock !== undefined) data.stock = stock;
-    if (req.file) data.imageUrl = `/uploads/${req.file.filename}`;
+    if (req.file) data.imageUrl = await uploadProductImage(req.file);
 
     if (category) {
       const categorySlug = category.toLowerCase().replace(/\s+/g, '-');
