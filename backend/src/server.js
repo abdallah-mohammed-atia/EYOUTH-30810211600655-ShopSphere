@@ -13,8 +13,16 @@ async function start() {
     await connectMongo();
     console.log('MongoDB connection established.');
 
-    await prisma.$connect();
-    console.log('Prisma client connected.');
+    try {
+      // Avoid blocking startup indefinitely if the database is unreachable in serverless environments.
+      await Promise.race([
+        prisma.$connect(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Prisma connect timeout')), 5000)),
+      ]);
+      console.log('Prisma client connected.');
+    } catch (prismaErr) {
+      console.warn('Prisma client connection failed or timed out (continuing):', prismaErr.message);
+    }
 
     if (process.env.PRISMA_MIGRATE !== 'false') {
       try {
