@@ -2,7 +2,7 @@ const prisma = require('../lib/prisma');
 const bcrypt = require('bcryptjs');
 const { signToken } = require('../utils/jwt');
 const { getMongoDb } = require('../lib/mongo');
-const { sendWelcomeEmail } = require('../utils/mail');
+
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -51,11 +51,15 @@ async function register(req, res, next) {
       // Ignore Mongo logging failures so core auth flows still succeed.
     }
 
-    try {
-      await sendWelcomeEmail(user.email, user.name);
-    } catch (mailErr) {
-      console.warn('Welcome email unavailable:', mailErr.message);
-    }
+       // Fire-and-forget call to the standalone welcome-email serverless job.
+    // Runs outside the main application; registration doesn't wait on it.
+    fetch(process.env.WELCOME_EMAIL_JOB_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ to: user.email, name: user.name }),
+    }).catch((err) => {
+      console.warn('Welcome email job unavailable:', err.message);
+    });
 
     return res.status(201).json({
       token,
