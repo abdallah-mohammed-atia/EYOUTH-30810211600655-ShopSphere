@@ -53,6 +53,14 @@ jobs:
             pg_isready -h localhost -p 5432 -U postgres && break || sleep 2
           done
 
+      - name: Debug DATABASE_URL format (safe)
+        env:
+          DATABASE_URL: ${{ secrets.CI_DATABASE_URL }}
+        run: |
+          echo "Length: ${#DATABASE_URL}"
+          echo "First 15 chars: ${DATABASE_URL:0:15}"
+          echo "Contains postgresql:// : $(echo $DATABASE_URL | grep -c 'postgresql://')"
+
       - name: Run DB migrations
         working-directory: backend
         env:
