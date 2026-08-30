@@ -58,6 +58,7 @@ jobs:
         env:
           NODE_ENV: test
           DATABASE_URL: ${{ secrets.CI_DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.CI_DATABASE_URL }}
           DB_HOST: localhost
           DB_PORT: 5432
           DB_USER: postgres
@@ -71,6 +72,7 @@ jobs:
         env:
           NODE_ENV: test
           DATABASE_URL: ${{ secrets.CI_DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.CI_DATABASE_URL }}
           DB_HOST: localhost
           DB_PORT: 5432
           DB_USER: postgres
