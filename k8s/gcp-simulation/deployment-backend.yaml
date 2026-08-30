@@ -17,7 +17,8 @@ spec:
         - name: backend
           image: hashicorp/http-echo:0.2.3
           args:
-            - "-text=gcp backend healthy"
+            - "-listen=:80"
+            - "-text=aws backend healthy"
           ports:
             - containerPort: 80
 

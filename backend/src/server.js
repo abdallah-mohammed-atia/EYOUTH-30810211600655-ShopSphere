@@ -1,4 +1,5 @@
 require('dotenv').config();
+console.log('backend JWT_SECRET length:', process.env.JWT_SECRET?.length, 'first8:', process.env.JWT_SECRET?.slice(0,8), 'last8:', process.env.JWT_SECRET?.slice(-8));
 
 const path = require('path');
 const app = require('./app');

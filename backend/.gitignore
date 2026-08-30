@@ -7,3 +7,7 @@ src/uploads/*
 !src/uploads/seed-images/**
 npm-debug.log*
 .DS_Store
+.vercel
+.env.vercel
+.env.production.vercel
+*.bak
