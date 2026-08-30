@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, master, final/delivery ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
 
 jobs:
   backend-tests:
@@ -32,10 +32,19 @@ jobs:
           --health-cmd "mongosh --eval 'db.adminCommand({ ping: 1 })'" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - uses: actions/checkout@v4
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Build backend (prisma generate)
+        working-directory: backend
+        run: npx prisma generate
 
       - name: Wait for DBs
         run: |
@@ -44,11 +53,7 @@ jobs:
             pg_isready -h localhost -p 5432 -U postgres && break || sleep 2
           done
 
-      - name: Install backend deps
-        working-directory: backend
-        run: npm ci
-
-      - name: Prepare Prisma and DB
+      - name: Run DB migrations
         working-directory: backend
         env:
           NODE_ENV: test
@@ -59,9 +64,7 @@ jobs:
           DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
           DB_NAME: ${{ secrets.CI_DB_NAME }}
           MONGODB_URI: ${{ secrets.CI_MONGODB_URI }}
-        run: |
-          npx prisma generate
-          npx prisma migrate deploy
+        run: npx prisma migrate deploy
 
       - name: Run backend tests
         working-directory: backend
@@ -74,8 +77,7 @@ jobs:
           DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
           DB_NAME: ${{ secrets.CI_DB_NAME }}
           MONGODB_URI: ${{ secrets.CI_MONGODB_URI }}
-        run: |
-          npm test -- --runInBand
+        run: npm test -- --runInBand
 
   frontend-tests:
     name: Frontend tests
@@ -86,13 +88,22 @@ jobs:
         node-version: [20]
     steps:
       - uses: actions/checkout@v4
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Install frontend deps
+
+      - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          CI: 'true'
+        run: npm run build
+
       - name: Run frontend tests
         working-directory: frontend
         env:
@@ -103,25 +114,21 @@ jobs:
     name: Deploy to Vercel (production)
     runs-on: ubuntu-latest
     needs: frontend-tests
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Deploy backend to Vercel (backend project root)
-        uses: amondnet/vercel-action@v20
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}
-          vercel-args: '--cwd backend --prod'
-      - name: Deploy frontend to Vercel (frontend project root)
-        uses: amondnet/vercel-action@v20
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
-          vercel-args: '--cwd frontend --prod'
->>>>>>> submission/main
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel
+
+      - name: Pull Vercel project settings
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build project artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to production
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
