@@ -1,0 +1,10 @@
+{
+  "name": "eyouth-root",
+  "private": true,
+  "scripts": {
+    "postinstall": "cd backend && npm ci && npm run vercel-build"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
+  }
+}

@@ -6,7 +6,15 @@ const router = express.Router();
 
 router.get('/health', async (req, res) => {
   try {
-    await prisma.$queryRaw`SELECT 1`;
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+    } catch (err) {
+      if (err.message && err.message.includes('prepared statement')) {
+        await prisma.$queryRaw`SELECT 1`;
+      } else {
+        throw err;
+      }
+    }
   } catch (err) {
     return res.status(500).json({ status: 'error', postgres: 'down', message: err.message });
   }

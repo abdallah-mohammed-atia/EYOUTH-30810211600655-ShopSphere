@@ -20,11 +20,13 @@ const app = express();
 // Security middlewares
 app.use(helmet());
 
-// Trust proxy when running behind Vercel or when explicitly enabled.
-// This allows express-rate-limit and other middleware to read the real client IP
-// from the X-Forwarded-* headers.
-if (process.env.TRUST_PROXY === 'true' || process.env.VERCEL === '1' || process.env.NODE_ENV === 'production') {
+// Trust proxy configuration:
+// - If `TRUST_PROXY` explicitly set to 'true', enable permissive trust (use with caution).
+// - If running on Vercel, trust the first proxy only (value = 1) to avoid permissive behavior.
+if (process.env.TRUST_PROXY === 'true') {
   app.set('trust proxy', true);
+} else if (process.env.VERCEL === '1') {
+  app.set('trust proxy', 1);
 }
 
 // Rate limiting: sensible defaults, can be overridden via env

@@ -35,7 +35,7 @@ async function register(req, res, next) {
       },
     });
 
-    const token = signToken({ id: user.id, role: user.role });
+    const token = signToken({ id: user.id, role: user.role, name: user.name, email: user.email });
 
     try {
       const db = await getMongoDb();
@@ -83,7 +83,7 @@ async function login(req, res, next) {
       return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
-    const token = signToken({ id: user.id, role: user.role });
+    const token = signToken({ id: user.id, role: user.role, name: user.name, email: user.email });
     return res.status(200).json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
   } catch (err) {
     next(err);
