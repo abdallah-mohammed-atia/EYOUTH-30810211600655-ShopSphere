@@ -8,7 +8,6 @@ const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
-const reviewRoutes = require('./routes/reviewRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const healthRoutes = require('./routes/healthRoutes');
 const orderRoutes = require('./routes/orderRoutes');
@@ -77,26 +76,27 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/categories', categoryRoutes);
 
 // Reviews: either proxy to external review service or mount internal routes
-if (process.env.USE_EXTERNAL_REVIEW_SERVICE === 'true' && process.env.REVIEW_SERVICE_URL) {
-  const fetch = require('node-fetch');
-  app.use('/api/reviews', async (req, res, next) => {
-    try {
-      const path = req.originalUrl.replace('/api/reviews', '');
-      const url = new URL(path, process.env.REVIEW_SERVICE_URL + '/api/reviews');
-      const fetchRes = await fetch(url.toString(), {
-        method: req.method,
-        headers: { 'content-type': 'application/json' },
-        body: ['GET', 'HEAD'].includes(req.method) ? undefined : JSON.stringify(req.body),
-      });
-      const text = await fetchRes.text();
-      res.status(fetchRes.status).send(text);
-    } catch (err) {
-      next(err);
+// Reviews: proxied entirely to the independently deployed review-service.
+const fetch = require('node-fetch');
+app.use('/api/reviews', async (req, res, next) => {
+  try {
+    const path = req.originalUrl.replace('/api/reviews', '');
+    const url = new URL(process.env.REVIEW_SERVICE_URL + '/api/reviews' + path);
+    const forwardHeaders = { 'content-type': 'application/json' };
+    if (req.headers.authorization) {
+      forwardHeaders.authorization = req.headers.authorization;
     }
-  });
-} else {
-  app.use('/api/reviews', reviewRoutes);
-}
+    const fetchRes = await fetch(url.toString(), {
+      method: req.method,
+      headers: forwardHeaders,
+      body: ['GET', 'HEAD'].includes(req.method) ? undefined : JSON.stringify(req.body),
+    });
+    const text = await fetchRes.text();
+    res.status(fetchRes.status).send(text);
+  } catch (err) {
+    next(err);
+  }
+});
 
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);

@@ -5,3 +5,4 @@ node_modules/
 
 jwt.txt
 .vercel
+.env*
