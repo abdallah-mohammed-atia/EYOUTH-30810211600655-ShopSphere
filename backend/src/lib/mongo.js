@@ -1,6 +1,7 @@
 const { MongoClient } = require('mongodb');
 
 const uri = process.env.MONGODB_URI || 'mongodb://mongo:27017/ecommerce';
+console.log('MONGODB_URI present:', !!process.env.MONGODB_URI);
 const client = new MongoClient(uri, {
   serverSelectionTimeoutMS: 10000,
   connectTimeoutMS: 10000,
