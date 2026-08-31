@@ -1,0 +1,14 @@
+{
+  "name": "eyouth-root",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "review-service",
+    "jobs"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace frontend",
+    "start": "npm run start --workspace backend"
+  }
+}

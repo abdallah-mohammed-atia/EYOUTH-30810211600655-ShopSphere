@@ -1,0 +1,138 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-tests:
+    name: Backend tests (Postgres + Mongo services)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20]
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.CI_DB_NAME }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
+      mongo:
+        image: mongo:6
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand({ ping: 1 })'" --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm install
+
+      - name: Build backend (prisma generate)
+        working-directory: backend
+        run: npx prisma generate
+
+      - name: Wait for DBs
+        run: |
+          echo "Waiting for Postgres and Mongo to be ready..."
+          for i in {1..15}; do
+            pg_isready -h localhost -p 5432 -U postgres && break || sleep 2
+          done
+
+      - name: Run DB migrations
+        working-directory: backend
+        env:
+          NODE_ENV: test
+          DATABASE_URL: ${{ secrets.CI_DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.CI_DATABASE_URL }}
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: postgres
+          DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
+          DB_NAME: ${{ secrets.CI_DB_NAME }}
+          MONGODB_URI: ${{ secrets.CI_MONGODB_URI }}
+        run: npx prisma migrate deploy
+
+      - name: Run backend tests
+        working-directory: backend
+        env:
+          NODE_ENV: test
+          DATABASE_URL: ${{ secrets.CI_DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.CI_DATABASE_URL }}
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: postgres
+          DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
+          DB_NAME: ${{ secrets.CI_DB_NAME }}
+          MONGODB_URI: ${{ secrets.CI_MONGODB_URI }}
+          JWT_SECRET: ${{ secrets.CI_JWT_SECRET }}
+          JWT_EXPIRES_IN: 7d
+        run: npm test -- --runInBand
+
+  frontend-tests:
+    name: Frontend tests
+    runs-on: ubuntu-latest
+    needs: backend-tests
+    strategy:
+      matrix:
+        node-version: [20]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          CI: 'true'
+        run: npm run build
+
+      - name: Run frontend tests
+        working-directory: frontend
+        env:
+          CI: 'true'
+        run: npm test -- --watchAll=false
+
+  deploy-to-vercel:
+    name: Deploy to Vercel (production)
+    runs-on: ubuntu-latest
+    needs: frontend-tests
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel
+
+      - name: Pull Vercel project settings
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build project artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to production
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
