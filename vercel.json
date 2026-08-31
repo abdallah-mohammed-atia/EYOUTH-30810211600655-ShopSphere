@@ -1,0 +1,18 @@
+{
+  "services": {
+    "frontend": {
+      "root": "frontend/",
+      "buildCommand": "npm install && npm run build",
+      "outputDirectory": "build"
+    },
+    "backend": {
+      "root": "backend/",
+      "entrypoint": "src/app.js"
+    }
+  },
+  "rewrites": [
+    { "source": "/api", "destination": { "service": "backend" } },
+    { "source": "/api/(.*)", "destination": { "service": "backend" } },
+    { "source": "/(.*)", "destination": { "service": "frontend" } }
+  ]
+}
